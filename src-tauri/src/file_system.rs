@@ -38,6 +38,24 @@ pub fn load_episode_script_file(dir: &Path, episode_id: &str) -> Result<String, 
         .map_err(|e| format!("failed to read script file '{}': {}", episode_id, e))
 }
 
+/// 指定されたディレクトリとエピソードIDからエピソードデータ(JSON)ファイルの内容を読み込む関数
+pub fn load_episode_data_file(dir: &Path, episode_id: &str) -> Result<String, String> {
+    // episode_id の拡張子有無や種類に関わらず、末尾の拡張子を除去して ".json" を付与
+    let json_filename = match episode_id.rfind('.') {
+        Some(idx) => format!("{}{}.json", &episode_id[..idx], ""),
+        None => format!("{}.json", episode_id),
+    };
+    let mut file_path = dir.to_path_buf();
+    file_path.push(json_filename);
+    std::fs::read_to_string(&file_path).map_err(|e| {
+        format!(
+            "failed to read episode data file '{}': {}",
+            file_path.display(),
+            e
+        )
+    })
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -109,5 +127,63 @@ mod tests {
         assert!(result.is_err());
         let err = result.err().unwrap();
         assert!(err.contains("failed to read script file"));
+    }
+
+    #[test]
+    fn test_load_episode_data_file_reads_json_with_txt_extension() {
+        let dir = tempdir().unwrap();
+        let episode_id = "episode01.txt";
+        let json_filename = "episode01.json";
+        let json_content = r#"{"test":true}"#;
+        let file_path = dir.path().join(json_filename);
+        {
+            let mut file = File::create(&file_path).unwrap();
+            write!(file, "{}", json_content).unwrap();
+        }
+        let result = load_episode_data_file(dir.path(), episode_id);
+        assert!(result.is_ok());
+        assert_eq!(result.unwrap(), json_content);
+    }
+
+    #[test]
+    fn test_load_episode_data_file_reads_json_with_no_extension() {
+        let dir = tempdir().unwrap();
+        let episode_id = "episode01";
+        let json_filename = "episode01.json";
+        let json_content = r#"{"test":123}"#;
+        let file_path = dir.path().join(json_filename);
+        {
+            let mut file = File::create(&file_path).unwrap();
+            write!(file, "{}", json_content).unwrap();
+        }
+        let result = load_episode_data_file(dir.path(), episode_id);
+        assert!(result.is_ok());
+        assert_eq!(result.unwrap(), json_content);
+    }
+
+    #[test]
+    fn test_load_episode_data_file_reads_json_with_custom_extension() {
+        let dir = tempdir().unwrap();
+        let episode_id = "episode01.custom";
+        let json_filename = "episode01.json";
+        let json_content = r#"{"foo":"bar"}"#;
+        let file_path = dir.path().join(json_filename);
+        {
+            let mut file = File::create(&file_path).unwrap();
+            write!(file, "{}", json_content).unwrap();
+        }
+        let result = load_episode_data_file(dir.path(), episode_id);
+        assert!(result.is_ok());
+        assert_eq!(result.unwrap(), json_content);
+    }
+
+    #[test]
+    fn test_load_episode_data_file_returns_error_for_missing_file() {
+        let dir = tempdir().unwrap();
+        let episode_id = "not_exist.txt";
+        let result = load_episode_data_file(dir.path(), episode_id);
+        assert!(result.is_err());
+        let err = result.err().unwrap();
+        assert!(err.contains("failed to read episode data file"));
     }
 }

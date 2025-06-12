@@ -7,5 +7,5 @@
   "[rust]": {
     "editor.defaultFormatter": "rust-lang.rust-analyzer"
   },
-  "cSpell.words": ["maskout", "tauri"]
+  "cSpell.words": ["maskout", "rfind", "tauri"]
 }
