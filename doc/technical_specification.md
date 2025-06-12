@@ -191,8 +191,9 @@ export async function speak(text: string): Promise<void> {
 * `async fn load_episode_progress(episode_id: String) -> Result<String, String>`:
     * 指定された `episode_id` (ファイル名) に対応する学習進捗JSONファイル（存在する場合）を読み込みます。
     * スクリプトをパースは行わず、テキスト内容をそのまま返します。進捗ファイルが存在しない場合は、空文字列を返します。
-* `async fn save_episode_data(episode_data: EpisodeData) -> Result<(), String>`:
-    * フロントエンドから受け取った `EpisodeData` オブジェクトを、対応する `episode_id` のJSONファイルとしてローカルストレージに保存します。ファイル名は `episode_id` (例: `episode_01.txt` なら `episode_01.json`) に基づいて決定します。
+* `async fn save_episode_data(episode_data: String) -> Result<(), String>`:
+    * フロントエンドから受け取った `episode_data` を、対応する `episode_id` のJSONファイルとしてローカルストレージに保存します。ファイル名は `episode_id` (例: `episode_01.txt` なら `episode_01.json`) に基づいて決定します。
+    * この関数は `episode_data` の内容がJSONかどうかは感知せず、単に文字列を保存するだけです。
 * `async fn text_to_speech(text: String) -> Result<(), String>`:
     * 受け取った `text` をOS標準のTTS機能を使用して読み上げます。
     * プラットフォームごとのTTSライブラリを利用します。TauriのAPIにTTS機能があればそちらを優先検討します。

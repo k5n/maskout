@@ -26,8 +26,7 @@ pub fn scan_episode_list(dir: &Path) -> Result<Vec<String>, String> {
 /// 指定されたディレクトリとファイル名からスクリプトファイルの内容を読み込む関数
 pub fn load_episode_script_file(dir: &Path, episode_id: &str) -> Result<String, String> {
     let mut file_path = dir.to_path_buf();
-    let filename = format!("{}.txt", episode_id);
-    file_path.push(filename);
+    file_path.push(episode_id);
     std::fs::read_to_string(&file_path)
         .map_err(|e| format!("failed to read script file '{}': {}", episode_id, e))
 }
@@ -71,10 +70,9 @@ mod tests {
     #[test]
     fn test_load_episode_script_file_reads_file_content() {
         let dir = tempdir().unwrap();
-        let episode_id = "test_episode";
-        let filename = format!("{}.txt", episode_id);
+        let episode_id = "test_episode.txt";
         let file_content = "Hello, this is a test script.";
-        let file_path = dir.path().join(&filename);
+        let file_path = dir.path().join(&episode_id);
         {
             let mut file = File::create(&file_path).unwrap();
             writeln!(file, "{}", file_content).unwrap();
@@ -90,7 +88,7 @@ mod tests {
     #[test]
     fn test_load_episode_script_file_returns_error_for_missing_file() {
         let dir = tempdir().unwrap();
-        let episode_id = "not_exist";
+        let episode_id = "not_exist.txt";
         let result = load_episode_script_file(dir.path(), episode_id);
         assert!(result.is_err());
         let err = result.err().unwrap();
