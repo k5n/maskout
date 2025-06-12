@@ -7,6 +7,13 @@ pub fn get_script_dir(app_data_dir: &Path) -> Result<PathBuf, String> {
     Ok(dir)
 }
 
+/// パース済みエピソード内容と進捗を含むJSONファイルの保存ディレクトリを取得する関数
+pub fn get_episode_data_dir(app_data_dir: &Path) -> Result<PathBuf, String> {
+    let mut dir = app_data_dir.to_path_buf();
+    dir.push("data");
+    Ok(dir)
+}
+
 /// 指定されたディレクトリをスキャンしてエピソードリストを返す関数
 pub fn scan_episode_list(dir: &Path) -> Result<Vec<String>, String> {
     let mut episodes = Vec::new();
@@ -46,6 +53,15 @@ mod tests {
         assert!(result.is_ok());
         let script_dir = result.unwrap();
         assert_eq!(script_dir, PathBuf::from("/mock/app/data/dir/scripts"));
+    }
+
+    #[test]
+    fn test_get_episode_data_dir_returns_expected_path() {
+        let app_data_dir = PathBuf::from("/mock/app/data/dir");
+        let result = get_episode_data_dir(&app_data_dir);
+        assert!(result.is_ok());
+        let script_dir = result.unwrap();
+        assert_eq!(script_dir, PathBuf::from("/mock/app/data/dir/data"));
     }
 
     #[test]
