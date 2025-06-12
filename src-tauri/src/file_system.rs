@@ -1,8 +1,8 @@
 use std::path::{Path, PathBuf};
 
 /// ユーザーのスクリプト保存ディレクトリを取得する関数
-pub fn get_script_dir(app_data_dir: &PathBuf) -> Result<PathBuf, String> {
-    let mut dir = app_data_dir.clone();
+pub fn get_script_dir(app_data_dir: &Path) -> Result<PathBuf, String> {
+    let mut dir = app_data_dir.to_path_buf();
     dir.push("scripts");
     Ok(dir)
 }
@@ -21,6 +21,15 @@ pub fn scan_episode_list(dir: &Path) -> Result<Vec<String>, String> {
         }
     }
     Ok(episodes)
+}
+
+/// 指定されたディレクトリとファイル名からスクリプトファイルの内容を読み込む関数
+pub fn load_episode_script_file(dir: &Path, episode_id: &str) -> Result<String, String> {
+    let mut file_path = dir.to_path_buf();
+    let filename = format!("{}.txt", episode_id);
+    file_path.push(filename);
+    std::fs::read_to_string(&file_path)
+        .map_err(|e| format!("failed to read script file '{}': {}", episode_id, e))
 }
 
 #[cfg(test)]
@@ -57,5 +66,34 @@ mod tests {
         let mut expected: Vec<String> = filenames.iter().map(|s| s.to_string()).collect();
         expected.sort();
         assert_eq!(episodes, expected);
+    }
+
+    #[test]
+    fn test_load_episode_script_file_reads_file_content() {
+        let dir = tempdir().unwrap();
+        let episode_id = "test_episode";
+        let filename = format!("{}.txt", episode_id);
+        let file_content = "Hello, this is a test script.";
+        let file_path = dir.path().join(&filename);
+        {
+            let mut file = File::create(&file_path).unwrap();
+            writeln!(file, "{}", file_content).unwrap();
+        }
+
+        // Remove trailing newline added by writeln!
+        let expected_content = format!("{}\n", file_content);
+        let result = load_episode_script_file(dir.path(), episode_id);
+        assert!(result.is_ok());
+        assert_eq!(result.unwrap(), expected_content);
+    }
+
+    #[test]
+    fn test_load_episode_script_file_returns_error_for_missing_file() {
+        let dir = tempdir().unwrap();
+        let episode_id = "not_exist";
+        let result = load_episode_script_file(dir.path(), episode_id);
+        assert!(result.is_err());
+        let err = result.err().unwrap();
+        assert!(err.contains("failed to read script file"));
     }
 }
