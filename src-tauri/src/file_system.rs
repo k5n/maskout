@@ -14,6 +14,15 @@ pub fn get_episode_data_dir(app_data_dir: &Path) -> Result<PathBuf, String> {
     Ok(dir)
 }
 
+/// 指定されたディレクトリが存在しなければ再帰的に作成する関数
+pub fn ensure_dir_exists(dir: &Path) -> Result<(), String> {
+    if !dir.exists() {
+        std::fs::create_dir_all(dir)
+            .map_err(|e| format!("failed to create dir '{}': {}", dir.display(), e))?;
+    }
+    Ok(())
+}
+
 /// 指定されたディレクトリをスキャンしてエピソードリストを返す関数
 pub fn scan_episode_list(dir: &Path) -> Result<Vec<String>, String> {
     let mut episodes = Vec::new();
