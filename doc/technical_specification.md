@@ -11,8 +11,10 @@
 * **バックエンド (Rust Core):** Rust を使用し、TauriのCoreプロセスとして動作します。主にファイルシステムアクセスとOS標準のText-To-Speech (TTS) 機能の呼び出しを担当します。
 * **連携:** フロントエンド (TypeScript) とバックエンド (Rust) は、Tauriの `invoke` (コマンド呼び出し) およびイベントシステムを通じて連携します。
 
-**将来のWebアプリ化への考慮:**
-バックエンド (Rust) の役割をファイルアクセスとTTSに限定し、主要な学習ロジック（マスキング戦略、進捗管理など）をフロントエンド (TypeScript) に実装することで、将来的にバックエンドをWeb APIに置き換える際の変更範囲を最小限に抑えます。
+バックエンド (Rust) の役割をフロントエンド (TypeScript) だけでできないことに限定する。
+
+- Rust より学習コストの低い TypeScript で実装することで、実装コストを抑えます。
+- 主要な学習ロジック（マスキング戦略、進捗管理など）をフロントエンド (TypeScript) に実装することで、将来的にバックエンドをWeb APIに置き換える際の変更範囲を最小限に抑えます。
 
 **3. ディレクトリ構造案 (Tauri + SvelteKit)**
 
@@ -32,7 +34,11 @@ maskout/
 │   │       └── +page.svelte  # 設定画面
 │   ├── lib/                  # 共通ロジック、型定義、ユーティリティ
 │   │   ├── types.ts          # データ構造の型定義
-│   │   ├── coreLogic.ts      # マスキング、進捗管理などのコアロジック
+│   │   ├── logic/            # マスキング、進捗管理などのコアロジック
+│   │   │   ├── file_system.ts         # ファイルシステムへのアクセス
+│   │   │   ├── parse.ts               # エピソードのインポート時のパース
+│   │   │   ├── learning.ts            # 学習の進捗管理
+│   │   │   └── index.ts      # コアロジックのエクスポート
 │   │   ├── stores/           # 状態管理 (Svelte Stores)
 │   │   │   ├── appState.ts
 │   │   │   ├── learningProgressStore.ts
@@ -49,7 +55,6 @@ maskout/
 │   │   ├── main.rs           # Rustエントリーポイント、Tauriハンドラ設定
 │   │   ├── lib.rs            # フロントエンドから呼び出されるコマンド実装
 │   │   ├── commands.rs       # Tauriコマンド実装
-│   │   ├── file_system.rs    # ファイルアクセス処理
 │   │   └── tts.rs            # TTS処理
 │   ├── tauri.conf.json       # Tauri設定ファイル
 │   ├── Cargo.toml            # Rustクレート定義
@@ -153,23 +158,6 @@ SvelteKitでは、ページの `load` 関数やコンポーネント内でこれ
 ```typescript
 // src/lib/api.ts - API呼び出しをまとめたユーティリティ
 import { invoke } from '@tauri-apps/api/tauri';
-import type { EpisodeData } from './types';
-
-export async function loadEpisodes(): Promise<string[]> {
-  return await invoke('get_episode_list');
-}
-
-export async function loadEpisodeScript(episodeId: string): Promise<string> {
-  return await invoke('load_episode_script', { episodeId });
-}
-
-export async function loadEpisodeProgress(episodeId: string): Promise<string> {
-  return await invoke('load_episode_progress', { episodeId });
-}
-
-export async function saveEpisodeProgress(episodeData: EpisodeData): Promise<void> {
-  await invoke('save_episode_data', { episodeData });
-}
 
 export async function speak(text: string): Promise<void> {
   await invoke('text_to_speech', { text });
@@ -182,30 +170,12 @@ export async function speak(text: string): Promise<void> {
 **5.1. 公開するTauriコマンド (API設計) (src-tauri/src/commands.rs)**
 
 以下の関数をTauriコマンドとしてフロントエンドに公開します (`#[tauri::command]` アトリビュートを使用)。
-フロントエンドでは出来ない最低限のI/O処理のみを行い、データのパースなどはフロントエンドに任せます。
+フロントエンドでは出来ない最低限の処理のみを行い、データのパースなどはフロントエンドに任せます。
+また通常ブラウザではできないファイルシステムへのアクセスなども、できる限り Tauri のプラグインとして提供されているものを利用して、フロントエンド側で実装します。
 
-* `async fn get_episode_list() -> Result<Vec<String>, String>`:
-    * ユーザーがスクリプトを保存するディレクトリ（場所は固定または設定可能にする、初期はアプリのデータディレクトリ内の特定フォルダを想定）をスキャンし、テキストファイル（`.txt`など）のリスト（ファイル名）を返します。これがエピソードリストとなります。
-* `async fn load_episode_script(episode_id: String) -> Result<String, String>`:
-    * 指定された `episode_id` (ファイル名) に対応するスクリプトテキストファイルを読み込みます。
-    * スクリプトのパースは行わず、テキスト内容をそのまま返します。
-* `async fn load_episode_data(episode_id: String) -> Result<String, String>`:
-    * 指定された `episode_id` (ファイル名) に対応するパース済みコンテンツ内容と学習進捗を含むJSONファイルを読み込みます。
-    * JSONのパースは行わず、テキスト内容をそのまま返します。対応ファイルが存在しない場合はエラーを返します。
-* `async fn save_episode_data(episode_id: String, episode_data: String) -> Result<(), String>`:
-    * フロントエンドから受け取った `episode_data` を、対応する `episode_id` のJSONファイルとしてローカルストレージに保存します。ファイル名は `episode_id` (例: `episode_01.txt` なら `episode_01.json`) に基づいて決定します。
-    * この関数は `episode_data` の内容がJSONかどうかは感知せず、単に文字列を保存するだけです。
 * `async fn text_to_speech(text: String) -> Result<(), String>`:
     * 受け取った `text` をOS標準のTTS機能を使用して読み上げます。
     * プラットフォームごとのTTSライブラリを利用します。TauriのAPIにTTS機能があればそちらを優先検討します。
-
-**5.2. ファイルアクセス処理 (src-tauri/src/file_system.rs)**
-
-* テキストファイル (スクリプト) の読み込み。
-* JSONファイル (学習進捗データ) の読み込みと書き込み。（内容がJSONであってもRust側では単なるテキストとして扱う）
-* ディレクトリ内のファイル一覧取得。
-* エラーハンドリング (ファイルが見つからない、アクセス権限がない等)。
-* データ保存場所: Tauriの `app_data_dir()` などを利用してプラットフォームに適した場所に保存します。
 
 **5.3. TTS処理 (src-tauri/src/tts.rs)**
 
@@ -219,6 +189,8 @@ export async function speak(text: string): Promise<void> {
 
 フロントエンドで利用するデータ構造です。
 TypeScriptでの型定義を以下に示します。この構造でJSONファイルとして保存・読込を行います。
+コンテンツ内容を表すデータ (EpisodeContent) と、その学習進捗状況を表すデータ (EpisodeProgress) を分けて管理します。
+
 
 ```typescript
 // src/lib/types.ts
@@ -249,15 +221,20 @@ export interface Sentence {
 }
 
 export interface EpisodeContent {
+  episodeId: string; // エピソード識別子 (例: "friends_s01e01.txt")
   sentences: Sentence[]; // セリフのリスト
   allWords: Word[]; // エピソード内の全単語のフラットなリスト。Sentence内のWordオブジェクトと同一インスタンスを指す。
+
+  importedTimestamp: string; // ISO 8601 形式のインポートされた日時
 }
 
 export interface EpisodeProgress {
+  episodeId: string; // エピソード識別子 (例: "friends_s01e01.txt")
   wordStatus: WordStatus[];
 
   initialLearning: {
     currentLap: number; // 現在の周回数 (1 から N まで)
+    totalLaps: number;  // 全体の周回数 （N）
     isCompleted: boolean; // 初期学習フェーズが完了したか（currentLap が N の周回が終了した際に true になる）
   };
 
@@ -270,11 +247,6 @@ export interface EpisodeProgress {
   lastLearnedTimestamp?: string; // ISO 8601 形式の最終学習日時
 }
 
-export interface EpisodeData {
-  episodeId: string; // エピソード識別子 (例: "friends_s01e01.txt")
-  content: EpisodeContent; // エピソードの内容
-  progress: EpisodeProgress; // エピソードの学習進捗状態
-}
 ```
 
 "Nice to meet you, Yoko."

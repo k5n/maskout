@@ -7,5 +7,5 @@
   "[rust]": {
     "editor.defaultFormatter": "rust-lang.rust-analyzer"
   },
-  "cSpell.words": ["maskout", "pico", "picocss", "rfind", "tauri"]
+  "cSpell.words": ["APPLOCALDATA", "iconify", "maskout", "pico", "picocss", "rfind", "tauri"]
 }

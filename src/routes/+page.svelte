@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { loadEpisodes } from '../lib/api';
+  import { loadEpisodes } from '../lib/logic/file_system';
+  import Icon from '@iconify/svelte';
 
   let episodes: string[] = $state([]);
   let loading = $state(true);
@@ -18,6 +19,10 @@
     }
   }
 
+  function handleImport() {
+    // TODO: 新規エピソードのインポート処理（現状は空）
+  }
+
   function handleSelect(episodeId: string) {
     // TODO: エピソード選択時の遷移や処理（現状は空）
   }
@@ -31,6 +36,10 @@
 
 <header class="app-header">
   <h1>エピソード選択</h1>
+  <button class="secondary import-button" onclick={handleImport}>
+    <Icon icon="lucide:upload" width="24" height="24" />
+    新規エピソードをインポート
+  </button>
 </header>
 
 {#if loading}
@@ -57,9 +66,25 @@
 
   /* アプリケーションヘッダー */
   .app-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap; /* 画面幅が狭い場合に備える */
+    gap: 1rem;
     text-align: center;
     border-bottom: var(--pico-border-width) solid var(--pico-muted-border-color);
     padding-bottom: 1rem;
     margin-bottom: 2rem;
+  }
+
+  .app-header h1 {
+    margin-bottom: 0; /* flexアイテムになったのでマージンを調整 */
+  }
+
+  /* 新規インポートボタン */
+  .import-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
   }
 </style>

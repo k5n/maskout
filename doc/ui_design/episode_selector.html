@@ -17,13 +17,38 @@
             }
         }
         
+        /* --- ▼ここから変更▼ --- */
+
         /* アプリケーションヘッダー */
         .app-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap; /* 画面幅が狭い場合に備える */
+            gap: 1rem;
             text-align: center;
             border-bottom: var(--pico-border-width) solid var(--pico-muted-border-color);
             padding-bottom: 1rem;
             margin-bottom: 2rem;
         }
+
+        .app-header h1 {
+            margin-bottom: 0; /* flexアイテムになったのでマージンを調整 */
+        }
+
+        /* 新規インポートボタン */
+        .import-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .import-button svg {
+            width: 1em;
+            height: 1em;
+        }
+
+        /* --- ▲ここまで変更▲ --- */
 
         /* 各エピソードカードのヘッダー */
         article header {
@@ -90,8 +115,11 @@
     <main class="container">
         <header class="app-header">
             <h1>エピソード選択</h1>
+            <button class="secondary import-button">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                新規エピソードをインポート
+            </button>
         </header>
-
         <div class="grid">
 
             <article>

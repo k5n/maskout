@@ -53,20 +53,29 @@ export interface Sentence {
 
 /** エピソードのパース後の内容 */
 export interface EpisodeContent {
+  /** エピソード識別子 (例: "friends_s01e01.txt") */
+  episodeId: string;
   /** セリフのリスト */
   sentences: Sentence[];
   /** エピソード内の全単語のフラットなリスト。Sentence内のWordオブジェクトと同一インスタンスを指す。 */
   allWords: Word[];
+  /** ISO 8601 形式のインポートされた日時 */
+  importedTimestamp: string;
 }
 
 /** エピソードの学習進捗状態 */
 export interface EpisodeProgress {
+  /** エピソード識別子 (例: "friends_s01e01.txt") */
+  episodeId: string;
+
   /** 各単語の学習状態 */
   wordStatus: WordStatus[];
 
   initialLearning: {
     /** 現在の周回数 (1 から N まで) */
     currentLap: number;
+    /** 全体の周回数 (N) */
+    totalLaps: number;
     /** 初期学習フェーズが完了したか（currentLap が N の周回が終了した際に true になる） */
     isCompleted: boolean;
   };
@@ -81,14 +90,4 @@ export interface EpisodeProgress {
 
   /** ISO 8601 形式の最終学習日時 */
   lastLearnedTimestamp?: string;
-}
-
-/** エピソード全体の情報 */
-export interface EpisodeData {
-  /** エピソード識別子 (例: "friends_s01e01.txt") */
-  episodeId: string;
-  /** エピソードの内容 */
-  content: EpisodeContent;
-  /** エピソードの学習進捗状態 */
-  progress: EpisodeProgress;
 }
