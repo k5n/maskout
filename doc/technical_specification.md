@@ -34,11 +34,14 @@ maskout/
 │   │       └── +page.svelte  # 設定画面
 │   ├── lib/                  # 共通ロジック、型定義、ユーティリティ
 │   │   ├── types.ts          # データ構造の型定義
-│   │   ├── logic/            # マスキング、進捗管理などのコアロジック
+│   │   ├── usecases/         # 複数機能を組み合わせるアプリケーションのユースケース
+│   │   │   ├── ...
+│   │   │   └── import.ts              # スクリプトファイルのインポート
+│   │   ├── services/         # 単機能に分離されたコアロジック
 │   │   │   ├── file_system.ts         # ファイルシステムへのアクセス
-│   │   │   ├── parse.ts               # エピソードのインポート時のパース
-│   │   │   ├── learning.ts            # 学習の進捗管理
-│   │   │   └── index.ts      # コアロジックのエクスポート
+│   │   │   ├── parse.ts               # エピソードのパース
+│   │   │   ├── ...
+│   │   │   └── learning.ts            # 学習の進捗管理
 │   │   ├── stores/           # 状態管理 (Svelte Stores)
 │   │   │   ├── appState.ts
 │   │   │   ├── learningProgressStore.ts
@@ -47,14 +50,13 @@ maskout/
 │   │       ├── EpisodeCard.svelte      # エピソード情報表示カード
 │   │       ├── LearningPanel.svelte    # 学習問題表示パネル
 │   │       ├── ProgressBar.svelte      # 進捗表示バー
-│   │       ├── TTSButton.svelte        # 音声再生ボタン
-│   │       └── index.ts      # コンポーネントのエクスポート
+│   │       ├── ...
+│   │       └── TTSButton.svelte        # 音声再生ボタン
 │   └── assets/               # 静的アセット（画像、スタイルなど）
 ├── src-tauri/                # バックエンド (Rust)
 │   ├── src/
 │   │   ├── main.rs           # Rustエントリーポイント、Tauriハンドラ設定
 │   │   ├── lib.rs            # フロントエンドから呼び出されるコマンド実装
-│   │   ├── commands.rs       # Tauriコマンド実装
 │   │   └── tts.rs            # TTS処理
 │   ├── tauri.conf.json       # Tauri設定ファイル
 │   ├── Cargo.toml            # Rustクレート定義

@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
-  import { loadEpisodes } from '../lib/logic/file_system';
+  import { loadEpisodes } from '$lib/services/file_system';
   import Icon from '@iconify/svelte';
+  import { onMount } from 'svelte';
 
   let episodes: string[] = $state([]);
   let loading = $state(true);

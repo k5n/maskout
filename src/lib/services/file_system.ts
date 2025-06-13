@@ -1,6 +1,6 @@
-import { trace, error } from '@tauri-apps/plugin-log';
-import { exists, BaseDirectory, mkdir, readDir } from '@tauri-apps/plugin-fs';
-import type { EpisodeProgress, EpisodeContent } from '$lib/types';
+import type { EpisodeContent, EpisodeProgress } from '$lib/types';
+import { BaseDirectory, exists, mkdir, readDir } from '@tauri-apps/plugin-fs';
+import { error, trace } from '@tauri-apps/plugin-log';
 
 const DATA_DIR = 'data';
 
