@@ -1,290 +1,172 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="ja" data-theme="light">
 <head>
-    <meta charset="UTF-UTF-8">
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Episode Selector</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css" />
     <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
-            background-color: #f0f2f5;
-            margin: 0;
-            padding: 20px;
-            color: #333;
-            display: flex;
-            justify-content: center;
-            align-items: flex-start; /* 画面上部から開始 */
-            min-height: 100vh;
+        /* Pico.cssで表現しきれない、元のデザインの意図を維持するための最小限のカスタムCSS */
+        :root {
+            --pico-font-size: 18px; /* 基本フォントサイズを設定 */
         }
-
-        .episode-selector-container {
-            width: 100%;
-            max-width: 800px;
-            background-color: #ffffff;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            padding: 20px 30px;
+        
+        @media (min-width: 768px) {
+            .grid {
+                grid-template-columns: repeat(auto-fit, minmax(480px, 1fr));
+            }
         }
-
+        
+        /* アプリケーションヘッダー */
         .app-header {
             text-align: center;
-            margin-bottom: 30px;
-            border-bottom: 1px solid #e0e0e0;
-            padding-bottom: 20px;
+            border-bottom: var(--pico-border-width) solid var(--pico-muted-border-color);
+            padding-bottom: 1rem;
+            margin-bottom: 2rem;
         }
 
-        .app-header h1 {
-            font-size: 28px;
-            color: #1a237e; /* 濃い青 */
-            margin: 0;
-        }
-
-        .episode-list {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-
-        .episode-item {
-            background-color: #f9f9f9;
-            border: 1px solid #e0e0e0;
-            border-radius: 6px;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            transition: box-shadow 0.2s ease-in-out;
-        }
-
-        .episode-item:hover {
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-
-        .episode-header {
+        /* 各エピソードカードのヘッダー */
+        article header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            flex-wrap: wrap; /* タイトルが長い場合に備えて */
-            gap: 10px;
+            flex-wrap: wrap;
+            gap: 0.5rem;
         }
-
-        .episode-title {
-            font-size: 20px;
-            font-weight: 600;
-            color: #2c3e50;
-            margin: 0;
+        
+        article header h2 {
+            font-size: 1.25rem;
+            margin-bottom: 0;
         }
-
+        
+        /* ステータスバッジ */
         .status-badge {
-            padding: 5px 12px;
-            border-radius: 12px;
-            font-size: 12px;
+            padding: 0.25rem 0.75rem;
+            border-radius: var(--pico-border-radius);
+            font-size: 0.75rem;
             font-weight: 500;
             color: #fff;
             white-space: nowrap;
         }
 
-        .status-badge.new { background-color: #90a4ae; /* ブルーグレー */ }
-        .status-badge.in-progress { background-color: #29b6f6; /* ライトブルー */ }
-        .status-badge.review { background-color: #ffa726; /* オレンジ */ }
-        .status-badge.completed { background-color: #66bb6a; /* グリーン */ }
+        .status-badge.new { background-color: #90a4ae; }
+        .status-badge.in-progress { background-color: #29b6f6; }
+        .status-badge.review { background-color: #ffa726; }
+        .status-badge.completed { background-color: #66bb6a; }
 
-        .episode-body {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
+        /* カード内のセクション */
         .progress-section, .review-section {
-            font-size: 14px;
+            font-size: 0.875rem;
         }
 
         .progress-label, .review-label {
-            margin: 0 0 5px 0;
-            color: #555;
+            margin-bottom: 0.25rem;
+            color: var(--pico-secondary);
         }
 
-        .progress-bar-container {
-            width: 100%;
-            background-color: #e0e0e0;
-            border-radius: 4px;
-            height: 10px; /* 少し細く */
-            overflow: hidden;
-        }
+        /* 完了したプログレスバーの色 */
+        progress.completed-bar::-webkit-progress-value { background-color: #66bb6a; }
+        progress.completed-bar::-moz-progress-bar { background-color: #66bb6a; }
+        progress.completed-bar { color: #66bb6a; }
 
-        .progress-bar {
-            height: 100%;
-            background-color: #42a5f5; /* ブルー系 */
-            border-radius: 4px;
-            transition: width 0.3s ease;
-        }
-        .progress-bar.completed-bar {
-             background-color: #66bb6a; /* グリーン系 (完了時) */
-        }
-
-
-        .progress-text {
-            margin: 5px 0 0 0;
-            font-size: 13px;
-            color: #777;
-            text-align: right;
-        }
-
-        .review-count {
-            margin: 0;
-            font-weight: 500;
-            color: #333;
-        }
         .review-count.zero {
-            color: #888;
+            color: var(--pico-secondary);
         }
 
-        .episode-footer {
-            margin-top: 10px;
-            text-align: right;
+        /* 復習ボタンの色 */
+        .review-action {
+            --pico-background-color: #f57c00;
+            --pico-border-color: #f57c00;
+            --pico-color: #fff;
         }
-
-        .action-button {
-            padding: 10px 20px;
-            font-size: 14px;
-            font-weight: 500;
-            border: none;
-            border-radius: 4px;
-            color: #fff;
-            background-color: #1e88e5; /* 標準はブルー */
-            cursor: pointer;
-            transition: background-color 0.2s ease;
-        }
-
-        .action-button:hover {
-            background-color: #1565c0;
-        }
-
-        .action-button.review-action {
-            background-color: #f57c00; /* オレンジ系 (復習時) */
-        }
-        .action-button.review-action:hover {
-            background-color: #e65100;
-        }
-
-        .action-button.disabled {
-            background-color: #bdbdbd;
-            cursor: not-allowed;
-        }
-        .action-button.disabled:hover {
-            background-color: #bdbdbd;
-        }
-
-        /* 未学習時の特別なスタイル */
-        .episode-item.status-new .progress-bar-container {
-            background-color: #eceff1; /* 未学習時はプログレスバー背景をさらに薄く */
-        }
-        .episode-item.status-new .progress-text,
-        .episode-item.status-new .review-count {
-            color: #90a4ae;
+        .review-action:hover, .review-action:focus {
+            --pico-background-color: #e65100;
+            --pico-border-color: #e65100;
         }
 
     </style>
 </head>
 <body>
-    <div class="episode-selector-container">
+    <main class="container">
         <header class="app-header">
             <h1>エピソード選択</h1>
         </header>
 
-        <div class="episode-list">
-            <div class="episode-item status-new">
-                <div class="episode-header">
-                    <h2 class="episode-title">海外ドラマシリーズ エピソード1: 新しい始まり</h2>
+        <div class="grid">
+
+            <article>
+                <header>
+                    <h2>海外ドラマシリーズ エピソード1: 新しい始まり</h2>
                     <span class="status-badge new">未学習</span>
+                </header>
+                <div class="progress-section">
+                    <label for="p1" class="progress-label">初期学習進捗: - / 7 周</label>
+                    <progress id="p1" value="0" max="7"></progress>
                 </div>
-                <div class="episode-body">
-                    <div class="progress-section">
-                        <p class="progress-label">初期学習進捗:</p>
-                        <div class="progress-bar-container">
-                            <div class="progress-bar" style="width: 0%;"></div>
-                        </div>
-                        <p class="progress-text">- / 7 周</p>
-                    </div>
-                    <div class="review-section">
-                        <p class="review-label">復習対象単語数:</p>
-                        <p class="review-count">- 件</p>
-                    </div>
+                <div class="review-section">
+                    <p class="review-label">復習対象単語数:</p>
+                    <p class="review-count zero">- 件</p>
                 </div>
-                <div class="episode-footer">
-                    <button class="action-button">学習開始</button>
-                </div>
-            </div>
+                <footer>
+                    <button>学習開始</button>
+                </footer>
+            </article>
 
-            <div class="episode-item status-in-progress">
-                <div class="episode-header">
-                    <h2 class="episode-title">日常英会話マスター エピソード5: カフェでの注文</h2>
+            <article>
+                <header>
+                    <h2>日常英会話マスター エピソード5: カフェでの注文</h2>
                     <span class="status-badge in-progress">学習中</span>
+                </header>
+                <div class="progress-section">
+                    <label for="p2" class="progress-label">初期学習進捗: 3 / 7 周</label>
+                    <progress id="p2" value="3" max="7"></progress>
                 </div>
-                <div class="episode-body">
-                    <div class="progress-section">
-                        <p class="progress-label">初期学習進捗:</p>
-                        <div class="progress-bar-container">
-                            <div class="progress-bar" style="width: 42.8%;"></div> </div>
-                        <p class="progress-text">3 / 7 周</p>
-                    </div>
-                    <div class="review-section">
-                        <p class="review-label">復習対象単語数:</p>
-                        <p class="review-count">12 件</p>
-                    </div>
+                <div class="review-section">
+                    <p class="review-label">復習対象単語数:</p>
+                    <p class="review-count">12 件</p>
                 </div>
-                <div class="episode-footer">
-                    <button class="action-button">学習再開</button>
-                </div>
-            </div>
-
-            <div class="episode-item status-review">
-                <div class="episode-header">
-                    <h2 class="episode-title">ビジネス英語チャレンジ エピソード3: 会議での発言</h2>
+                <footer>
+                    <button>学習再開</button>
+                </footer>
+            </article>
+            
+            <article>
+                <header>
+                    <h2>ビジネス英語チャレンジ エピソード3: 会議での発言</h2>
                     <span class="status-badge review">復習中</span>
+                </header>
+                <div class="progress-section">
+                    <label for="p3" class="progress-label">初期学習進捗: 6 / 6 周 (完了)</label>
+                    <progress id="p3" class="completed-bar" value="6" max="6"></progress>
                 </div>
-                <div class="episode-body">
-                    <div class="progress-section">
-                        <p class="progress-label">初期学習進捗:</p>
-                        <div class="progress-bar-container">
-                            <div class="progress-bar completed-bar" style="width: 100%;"></div>
-                        </div>
-                        <p class="progress-text">6 / 6 周 (完了)</p>
-                    </div>
-                    <div class="review-section">
-                        <p class="review-label">復習対象単語数:</p>
-                        <p class="review-count">8 件</p>
-                    </div>
+                <div class="review-section">
+                    <p class="review-label">復習対象単語数:</p>
+                    <p class="review-count">8 件</p>
                 </div>
-                <div class="episode-footer">
-                    <button class="action-button review-action">復習開始</button>
-                </div>
-            </div>
+                <footer>
+                    <button class="review-action">復習開始</button>
+                </footer>
+            </article>
 
-            <div class="episode-item status-completed">
-                <div class="episode-header">
-                    <h2 class="episode-title">旅行英会話パーフェクト エピソード10: 空港にて</h2>
+            <article>
+                <header>
+                    <h2>旅行英会話パーフェクト エピソード10: 空港にて</h2>
                     <span class="status-badge completed">完了</span>
+                </header>
+                <div class="progress-section">
+                    <label for="p4" class="progress-label">初期学習進捗: 7 / 7 周 (完了)</label>
+                    <progress id="p4" class="completed-bar" value="7" max="7"></progress>
                 </div>
-                <div class="episode-body">
-                    <div class="progress-section">
-                        <p class="progress-label">初期学習進捗:</p>
-                        <div class="progress-bar-container">
-                            <div class="progress-bar completed-bar" style="width: 100%;"></div>
-                        </div>
-                        <p class="progress-text">7 / 7 周 (完了)</p>
-                    </div>
-                    <div class="review-section">
-                        <p class="review-label">復習対象単語数:</p>
-                        <p class="review-count zero">0 件</p>
-                    </div>
+                <div class="review-section">
+                    <p class="review-label">復習対象単語数:</p>
+                    <p class="review-count zero">0 件</p>
                 </div>
-                <div class="episode-footer">
-                    <button class="action-button disabled" disabled>学習完了</button>
-                </div>
-            </div>
+                <footer>
+                    <button disabled>学習完了</button>
+                </footer>
+            </article>
 
         </div>
-    </div>
+    </main>
 </body>
 </html>

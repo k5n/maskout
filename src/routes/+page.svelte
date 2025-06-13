@@ -29,24 +29,37 @@
   <title>エピソード選択</title>
 </svelte:head>
 
-<main>
+<header class="app-header">
   <h1>エピソード選択</h1>
-  {#if loading}
-    <p>読み込み中...</p>
-  {:else if error}
-    <p style="color:red">{error}</p>
-  {:else if episodes.length === 0}
-    <p>エピソードはまだありません。</p>
-  {:else}
-    <div class="episode-list">
-      {#each episodes as episode}
-        <button onclick={() => handleSelect(episode)} class="episode-item">
-          {episode}
-        </button>
-      {/each}
-    </div>
-  {/if}
-</main>
+</header>
+
+{#if loading}
+  <p>読み込み中...</p>
+{:else if error}
+  <p style="color:red">{error}</p>
+{:else if episodes.length === 0}
+  <p>エピソードはまだありません。</p>
+{:else}
+  <div class="grid">
+    {#each episodes as episode}
+      <!-- TODO: エピソードカードコンポーネントを使用 -->
+      <p>未実装</p>
+    {/each}
+  </div>
+{/if}
 
 <style>
+  @media (min-width: 768px) {
+    .grid {
+      grid-template-columns: repeat(auto-fit, minmax(480px, 1fr));
+    }
+  }
+
+  /* アプリケーションヘッダー */
+  .app-header {
+    text-align: center;
+    border-bottom: var(--pico-border-width) solid var(--pico-muted-border-color);
+    padding-bottom: 1rem;
+    margin-bottom: 2rem;
+  }
 </style>
