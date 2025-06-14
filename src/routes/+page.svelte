@@ -1,13 +1,12 @@
 <script lang="ts">
   import EpisodeCard from '$lib/components/EpisodeCard.svelte';
-  import type { EpisodeProgress } from '$lib/types';
+  import { episodeListStore } from '$lib/stores/episodeListStore.svelte';
   import { importScript, loadEpisodeProgresses } from '$lib/usecases/episode';
   import Icon from '@iconify/svelte';
   import { onMount } from 'svelte';
 
   const CHUNK_SIZE = 6;
 
-  let episodes: EpisodeProgress[] = $state([]);
   let loading = $state(true);
   let fileInput: HTMLInputElement;
 
@@ -27,7 +26,8 @@
   async function fetchEpisodes() {
     loading = true;
     try {
-      episodes = await loadEpisodeProgresses();
+      const loaded = await loadEpisodeProgresses();
+      episodeListStore.setEpisodes(loaded);
     } catch (e) {
       showErrorDialog('エピソード一覧の取得に失敗しました');
     } finally {
@@ -48,7 +48,7 @@
         const text = e.target?.result as string;
         try {
           const progress = await importScript(text, file.name, CHUNK_SIZE);
-          episodes = [...episodes, progress];
+          episodeListStore.addEpisode(progress);
         } catch (err) {
           if (err instanceof Error) {
             showErrorDialog(err.message);
@@ -92,11 +92,11 @@
 
 {#if loading}
   <p>読み込み中...</p>
-{:else if episodes.length === 0}
+{:else if episodeListStore.value.length === 0}
   <p>エピソードはまだありません。</p>
 {:else}
   <div class="grid">
-    {#each episodes as episode}
+    {#each episodeListStore.value as episode}
       <EpisodeCard progress={episode} />
     {/each}
   </div>

@@ -42,10 +42,10 @@ maskout/
 │   │   │   ├── parse.ts               # エピソードのパース
 │   │   │   ├── ...
 │   │   │   └── learning.ts            # 学習の進捗管理
-│   │   ├── stores/           # 状態管理 (Svelte Stores)
-│   │   │   ├── appState.ts
-│   │   │   ├── learningProgressStore.ts
-│   │   │   └── index.ts      # ストアのエクスポート
+│   │   ├── stores/           # 状態管理 (Runes 利用)
+│   │   │   ├── learningProgressStore.svelte.ts
+│   │   │   ├── ...
+│   │   │   └── episodeListStore.svelte.ts
 │   │   └── components/       # 再利用可能なUIコンポーネント
 │   │       ├── EpisodeCard.svelte      # エピソード情報表示カード
 │   │       ├── LearningPanel.svelte    # 学習問題表示パネル
