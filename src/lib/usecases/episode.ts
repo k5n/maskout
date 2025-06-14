@@ -42,6 +42,11 @@ export async function importScript(
   }
   // episodeId生成（タイトル行も含めた全体でハッシュ）
   const episodeId = await sha256Hex(scriptText);
+  // 重複チェック
+  const existingIds = await loadEpisodeIds();
+  if (existingIds.includes(episodeId)) {
+    throw new Error('同じ内容のエピソードは既にインポートされています');
+  }
   trace(`Importing script for episode: ${episodeId} (title: ${title})`);
   // parseEpisodeContentにtitleを渡す必要があるので、引数を変更する
   const parsedContent = await parseEpisodeContent(scriptBody, episodeId, chunkSize, title);

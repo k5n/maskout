@@ -4,21 +4,32 @@
   import { importScript, loadEpisodeProgresses } from '$lib/usecases/episode';
   import Icon from '@iconify/svelte';
   import { onMount } from 'svelte';
-  
+
   const CHUNK_SIZE = 6;
 
   let episodes: EpisodeProgress[] = $state([]);
   let loading = $state(true);
-  let error: string | null = $state(null);
   let fileInput: HTMLInputElement;
 
+  // エラーダイアログ用
+  let errorDialog: HTMLDialogElement;
+  let dialogMessage = $state('');
+
+  function showErrorDialog(message: string) {
+    dialogMessage = message;
+    errorDialog.showModal();
+  }
+
+  function closeDialog() {
+    errorDialog.close();
+  }
+  
   async function fetchEpisodes() {
     loading = true;
-    error = null;
     try {
       episodes = await loadEpisodeProgresses();
     } catch (e) {
-      error = 'エピソード一覧の取得に失敗しました';
+      showErrorDialog('エピソード一覧の取得に失敗しました');
     } finally {
       loading = false;
     }
@@ -35,10 +46,21 @@
       const reader = new FileReader();
       reader.onload = async (e) => {
         const text = e.target?.result as string;
-        const progress = await importScript(text, file.name, CHUNK_SIZE);
-        episodes = [...episodes, progress];
+        try {
+          const progress = await importScript(text, file.name, CHUNK_SIZE);
+          episodes = [...episodes, progress];
+        } catch (err) {
+          if (err instanceof Error) {
+            showErrorDialog(err.message);
+          } else {
+            showErrorDialog('エピソードのインポートに失敗しました');
+          }
+        }
+        fileInput.value = '';
       };
       reader.readAsText(file);
+    } else {
+      fileInput.value = '';
     }
   }
 
@@ -70,8 +92,6 @@
 
 {#if loading}
   <p>読み込み中...</p>
-{:else if error}
-  <p style="color:red">{error}</p>
 {:else if episodes.length === 0}
   <p>エピソードはまだありません。</p>
 {:else}
@@ -81,6 +101,18 @@
     {/each}
   </div>
 {/if}
+
+<dialog bind:this={errorDialog}>
+  <article>
+    <header>
+      <strong>エラー</strong>
+    </header>
+    <p>{dialogMessage}</p>
+    <footer>
+      <button onclick={closeDialog}>閉じる</button>
+    </footer>
+  </article>
+</dialog>
 
 <style>
   @media (min-width: 768px) {
