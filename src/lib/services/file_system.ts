@@ -1,5 +1,12 @@
 import type { EpisodeContent, EpisodeProgress } from '$lib/types';
-import { BaseDirectory, exists, mkdir, readDir, writeTextFile } from '@tauri-apps/plugin-fs';
+import {
+  BaseDirectory,
+  exists,
+  mkdir,
+  readDir,
+  readTextFile,
+  writeTextFile,
+} from '@tauri-apps/plugin-fs';
 import { error, trace } from '@tauri-apps/plugin-log';
 
 const EPISODE_DIR = 'episodes';
@@ -44,7 +51,13 @@ export async function saveEpisodeContent(episodeContent: EpisodeContent): Promis
 export async function loadEpisodeProgress(episodeId: string): Promise<EpisodeProgress> {
   trace(`Loading progress for episode: ${episodeId}`);
   try {
-    throw new Error('Not implemented');
+    const filePath = getProgressJsonFilePath(episodeId);
+    const existsFile = await exists(filePath, { baseDir: BaseDirectory.AppLocalData });
+    if (!existsFile) {
+      throw new Error('Progress file not found');
+    }
+    const json = await readTextFile(filePath, { baseDir: BaseDirectory.AppLocalData });
+    return JSON.parse(json) as EpisodeProgress;
   } catch (err) {
     error(`Failed to load episode progress (${episodeId}): ${err}`);
     throw new Error('Could not load episode progress. Please try again later.');
@@ -72,16 +85,6 @@ export async function speak(text: string): Promise<void> {
     throw new Error('Text-to-speech failed. Please try again later.');
   }
 }
-
-// /**
-//  * ユーザーのスクリプト保存ディレクトリのパスを取得
-//  */
-// export async function getScriptDir(baseDir: BaseDirectory): Promise<string>;
-
-// /**
-//  * パース済みエピソード内容と進捗を含むJSONファイルの保存ディレクトリのパスを取得
-//  */
-// export async function getEpisodeDataDir(baseDir: BaseDirectory): Promise<string>;
 
 /**
  * エピソードIDから保存用JSONファイル名を生成
@@ -136,21 +139,3 @@ async function scanEpisodeList(baseDir = BaseDirectory.AppLocalData): Promise<st
     .filter((name): name is string => typeof name === 'string');
   return episodes;
 }
-
-// /**
-//  * 指定されたディレクトリとファイル名からスクリプトファイルの内容を読み込む
-//  */
-// export async function loadEpisodeScriptFile(
-//   dirPath: string,
-//   episodeId: string,
-//   baseDir?: BaseDirectory
-// ): Promise<string>;
-
-// /**
-//  * 指定されたディレクトリとエピソードIDからエピソードデータ(JSON)ファイルの内容を読み込む
-//  */
-// export async function loadEpisodeDataFile(
-//   dirPath: string,
-//   episodeId: string,
-//   baseDir = BaseDirectory.AppLocalData
-// ): Promise<string>;
