@@ -26,8 +26,7 @@
   async function fetchEpisodes() {
     loading = true;
     try {
-      const loaded = await loadEpisodeProgresses();
-      episodeListStore.setEpisodes(loaded);
+      await loadEpisodeProgresses();
     } catch (e) {
       showErrorDialog('エピソード一覧の取得に失敗しました');
     } finally {
@@ -47,8 +46,7 @@
       reader.onload = async (e) => {
         const text = e.target?.result as string;
         try {
-          const progress = await importScript(text, file.name, CHUNK_SIZE);
-          episodeListStore.addEpisode(progress);
+          await importScript(text, file.name, CHUNK_SIZE);
         } catch (err) {
           if (err instanceof Error) {
             showErrorDialog(err.message);
@@ -56,12 +54,10 @@
             showErrorDialog('エピソードのインポートに失敗しました');
           }
         }
-        fileInput.value = '';
       };
       reader.readAsText(file);
-    } else {
-      fileInput.value = '';
     }
+    fileInput.value = '';
   }
 
   function handleSelect(episodeId: string) {

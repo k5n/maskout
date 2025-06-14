@@ -6,6 +6,7 @@ import {
 } from '$lib/services/file_system';
 import { initializeEpisodeProgress } from '$lib/services/learning';
 import { parseEpisodeContent } from '$lib/services/parse';
+import { episodeListStore } from '$lib/stores/episodeListStore.svelte';
 import type { EpisodeProgress } from '$lib/types';
 import { error, trace } from '@tauri-apps/plugin-log';
 
@@ -28,7 +29,7 @@ export async function importScript(
   scriptText: string,
   _fileName: string, // 互換のため残すが使わない
   chunkSize: number
-): Promise<EpisodeProgress> {
+): Promise<void> {
   // タイトル抽出
   const lines = scriptText.split(/\r?\n/);
   let title = '';
@@ -53,10 +54,10 @@ export async function importScript(
   await saveEpisodeContent(parsedContent);
   const progress = initializeEpisodeProgress(parsedContent);
   await saveEpisodeProgress(progress);
-  return progress;
+  episodeListStore.addEpisode(progress);
 }
 
-export async function loadEpisodeProgresses(): Promise<EpisodeProgress[]> {
+export async function loadEpisodeProgresses(): Promise<void> {
   trace('Loading all episode progresses...');
   const episodes = await loadEpisodeIds();
   const progresses: EpisodeProgress[] = [];
@@ -68,5 +69,5 @@ export async function loadEpisodeProgresses(): Promise<EpisodeProgress[]> {
       error(`Failed to load progress for episode ${episodeId}: ${err}`);
     }
   }
-  return progresses;
+  episodeListStore.setEpisodes(progresses);
 }
