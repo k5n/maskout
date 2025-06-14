@@ -187,12 +187,20 @@ export async function speak(text: string): Promise<void> {
 
 ---
 
+
 **6. データ構造 (JSONフォーマット および TypeScript型定義)**
 
 フロントエンドで利用するデータ構造です。
 TypeScriptでの型定義を以下に示します。この構造でJSONファイルとして保存・読込を行います。
 コンテンツ内容を表すデータ (EpisodeContent) と、その学習進捗状況を表すデータ (EpisodeProgress) を分けて管理します。
 
+### エピソードID・タイトルの扱い
+
+- `episodeId` は「エピソードスクリプト内容（タイトル行を含む全体）」のSHA-256ハッシュ値（16進文字列）とする。
+- `title` はインポート時にスクリプト先頭行が `# ` で始まる場合、その `# ` を除いた部分をタイトルとして抽出し、`EpisodeContent` に格納する。
+- 画面表示には `title` を用い、`episodeId`（ハッシュ値）は内部管理・ファイル名等に利用する。
+
+### 型定義例
 
 ```typescript
 // src/lib/types.ts
@@ -223,15 +231,16 @@ export interface Sentence {
 }
 
 export interface EpisodeContent {
-  episodeId: string; // エピソード識別子 (例: "friends_s01e01.txt")
+  episodeId: string; // エピソード識別子（スクリプト全体のSHA-256ハッシュ値、16進文字列）
+  title: string; // エピソードタイトル（スクリプト先頭行の `# ` を除いた部分）
   sentences: Sentence[]; // セリフのリスト
   allWords: Word[]; // エピソード内の全単語のフラットなリスト。Sentence内のWordオブジェクトと同一インスタンスを指す。
-
   importedTimestamp: string; // ISO 8601 形式のインポートされた日時
 }
 
 export interface EpisodeProgress {
-  episodeId: string; // エピソード識別子 (例: "friends_s01e01.txt")
+  episodeId: string; // エピソード識別子（スクリプト全体のSHA-256ハッシュ値）
+  title: string; // エピソードタイトル（スクリプト先頭行の `# ` を除いた部分）
   wordStatus: WordStatus[];
 
   initialLearning: {
@@ -248,31 +257,29 @@ export interface EpisodeProgress {
 
   lastLearnedTimestamp?: string; // ISO 8601 形式の最終学習日時
 }
-
 ```
 
-"Nice to meet you, Yoko."
-は SentenceToken で以下のように表されます。
+"Nice to meet you, Yoko." は SentenceToken で以下のように表されます。
 このように表すことで、マスク対象のものをマスクしつつセンテンスを表示するのを容易にします。
 
 ```json
 [
-  { type: 'word', wordId: 0, text: 'Nice' },
-  { type: 'char', text: ' ' },
-  { type: 'word', wordId: 1, text: 'to' },
-  { type: 'char', text: ' ' },
-  { type: 'word', wordId: 2, text: 'meet' },
-  { type: 'char', text: ' ' },
-  { type: 'word', wordId: 3, text: 'you' },
-  { type: 'char', text: ',' },
-  { type: 'char', text: ' ' },
-  { type: 'word', wordId: 4, text: 'Yoko' },
-  { type: 'char', text: '.' }
+  { "type": "word", "wordId": 0, "text": "Nice" },
+  { "type": "char", "text": " " },
+  { "type": "word", "wordId": 1, "text": "to" },
+  { "type": "char", "text": " " },
+  { "type": "word", "wordId": 2, "text": "meet" },
+  { "type": "char", "text": " " },
+  { "type": "word", "wordId": 3, "text": "you" },
+  { "type": "char", "text": "," },
+  { "type": "char", "text": " " },
+  { "type": "word", "wordId": 4, "text": "Yoko" },
+  { "type": "char", "text": "." }
 ]
 ```
 
 **JSON保存ファイル例 (`[episodeId].json`):**
-上記 `EpisodeData` インターフェースに準拠したJSONオブジェクトとして保存します。
+上記 `EpisodeContent` および `EpisodeProgress` インターフェースに準拠したJSONオブジェクトとして保存します。
 
 ---
 

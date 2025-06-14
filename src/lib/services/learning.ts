@@ -16,6 +16,7 @@ export function initializeEpisodeProgress(episodeContent: EpisodeContent): Episo
 
   return {
     episodeId: episodeContent.episodeId,
+    title: episodeContent.title,
     wordStatus,
     initialLearning: {
       currentLap: 0,

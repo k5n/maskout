@@ -53,8 +53,10 @@ export interface Sentence {
 
 /** エピソードのパース後の内容 */
 export interface EpisodeContent {
-  /** エピソード識別子 (例: "friends_s01e01.txt") */
+  /** エピソード識別子（スクリプト全体のSHA-256ハッシュ値、16進文字列） */
   episodeId: string;
+  /** エピソードタイトル（スクリプト先頭行の `# ` を除いた部分） */
+  title: string;
   /** セリフのリスト */
   sentences: Sentence[];
   /** エピソード内の全単語のフラットなリスト。Sentence内のWordオブジェクトと同一インスタンスを指す。 */
@@ -65,8 +67,10 @@ export interface EpisodeContent {
 
 /** エピソードの学習進捗状態 */
 export interface EpisodeProgress {
-  /** エピソード識別子 (例: "friends_s01e01.txt") */
+  /** エピソード識別子（スクリプト全体のSHA-256ハッシュ値、16進文字列） */
   episodeId: string;
+  /** エピソードタイトル（スクリプト先頭行の `# ` を除いた部分） */
+  title: string;
 
   /** 各単語の学習状態 */
   wordStatus: WordStatus[];

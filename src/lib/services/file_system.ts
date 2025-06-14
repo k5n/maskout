@@ -18,7 +18,8 @@ export async function loadEpisodeIds(): Promise<string[]> {
     await ensureDirExists(EPISODE_DIR, BaseDirectory.AppLocalData);
     const episodes = await scanEpisodeList(BaseDirectory.AppLocalData);
     trace(`Loaded episodes: ${episodes.length}`);
-    return episodes;
+    // ファイル名から拡張子を除いた部分（ハッシュ値）を返す
+    return episodes.map((name) => name.replace(/\.json$/, ''));
   } catch (err) {
     error(`Failed to load episodes: ${err}`);
     throw new Error('Could not load episodes. Please try again later.');
@@ -28,7 +29,13 @@ export async function loadEpisodeIds(): Promise<string[]> {
 export async function loadEpisodeContent(episodeId: string): Promise<EpisodeContent> {
   trace(`Loading script for episode: ${episodeId}`);
   try {
-    throw new Error('Not implemented');
+    const filePath = getContentJsonFilePath(episodeId);
+    const existsFile = await exists(filePath, { baseDir: BaseDirectory.AppLocalData });
+    if (!existsFile) {
+      throw new Error('Episode content file not found');
+    }
+    const json = await readTextFile(filePath, { baseDir: BaseDirectory.AppLocalData });
+    return JSON.parse(json) as EpisodeContent;
   } catch (err) {
     error(`Failed to load episode script (${episodeId}): ${err}`);
     throw new Error('Could not load episode script. Please try again later.');
@@ -87,16 +94,11 @@ export async function speak(text: string): Promise<void> {
 }
 
 /**
- * エピソードIDから保存用JSONファイル名を生成
- * 例: "friends_s01e01.txt" → "friends_s01e01.json"
+ * エピソードID（ハッシュ値）から保存用JSONファイル名を生成
+ * 例: "a1b2c3..." → "a1b2c3....json"
  */
 function getJsonFileName(episodeId: string): string {
-  const idx = episodeId.lastIndexOf('.');
-  if (idx !== -1) {
-    return episodeId.substring(0, idx) + '.json';
-  } else {
-    return episodeId + '.json';
-  }
+  return episodeId + '.json';
 }
 
 function getContentJsonFilePath(episodeId: string): string {

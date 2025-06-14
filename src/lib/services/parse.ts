@@ -55,7 +55,8 @@ function tokenizeSentence(
 export async function parseEpisodeContent(
   text: string,
   episodeId: string,
-  chunkSize: number
+  chunkSize: number,
+  title: string
 ): Promise<EpisodeContent> {
   // 1. Split lines, skip comments and blanks
   const lines = text.split(/\r?\n/);
@@ -97,6 +98,7 @@ export async function parseEpisodeContent(
 
   return {
     episodeId,
+    title,
     sentences,
     allWords,
     importedTimestamp,

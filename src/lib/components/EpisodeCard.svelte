@@ -76,7 +76,7 @@
 
 <article>
   <header>
-    <h2>{progress.episodeId}</h2>
+    <h2>{progress.title}</h2>
     <span class={'status-badge ' + statusMap[status].class}>{statusMap[status].label}</span>
   </header>
   <div class="progress-section">
