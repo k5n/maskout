@@ -1,226 +1,226 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="ja" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Learning View</title>
+    <title>MaskOut - 学習画面</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css" />
     <style>
+        :root {
+            --pico-font-size: 18px; /* 基本フォントサイズを設定 */
+        }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
-            background-color: #f0f2f5; /* 背景を少しグレーに */
-            margin: 0;
-            padding: 0; /* 全画面を使う想定 */
-            color: #333;
-            display: flex;
-            flex-direction: column; /* ヘッダー、メイン、フッターを縦積み */
-            height: 100vh; /* 画面の高さいっぱいに */
-            overflow: hidden; /* スクロールバーを基本的には出さない */
+            padding-bottom: 4rem; /* 下部の余白確保 */
         }
 
-        .learning-view-container {
-            display: flex;
-            flex-direction: column;
-            height: 100%;
-            width: 100%;
-        }
-
-        /* --- 1. Top Bar --- */
-        .top-bar {
-            background-color: #ffffff;
-            padding: 10px 20px;
+        /* ヘッダー */
+        .learning-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 1px solid #e0e0e0;
-            flex-shrink: 0; /* 高さが変わらないように */
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            flex-wrap: wrap; /* レスポンシブ対応 */
+            gap: 1rem;
+            border-bottom: var(--pico-border-width) solid var(--pico-muted-border-color);
+            padding-bottom: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .learning-header hgroup {
+            flex-grow: 1;
+            text-align: center;
+            margin-bottom: 0;
+        }
+        
+        .learning-header hgroup h2 {
+            font-size: 1.25rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .learning-header hgroup .learning-status {
+            font-size: 0.875rem;
+            color: var(--pico-secondary);
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            flex-wrap: wrap;
         }
 
         .back-button {
-            background: none;
-            border: 1px solid #ccc;
-            color: #555;
-            padding: 8px 15px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: background-color 0.2s, border-color 0.2s;
-        }
-        .back-button:hover {
-            background-color: #f5f5f5;
-            border-color: #bbb;
-        }
-
-        .episode-details {
-            font-size: 14px;
-            color: #555;
-            text-align: center;
-            flex-grow: 1; /* 中央寄せのため */
-        }
-        .episode-details .episode-name {
-            font-weight: 600;
-            color: #333;
-        }
-        .episode-details .phase-info {
-            margin-left: 5px;
-        }
-
-        .progress-indicator {
-            font-size: 14px;
-            color: #777;
-            min-width: 80px; /* レイアウトが崩れないように */
-            text-align: right;
-        }
-
-        /* --- 2. Main Content Area --- */
-        .main-content-area {
-            flex-grow: 1; /* 残りの高さをすべて使用 */
-            display: flex;
-            flex-direction: column;
-            justify-content: center; /* 垂直方向中央寄せ */
+            display: inline-flex;
             align-items: center;
-            padding: 20px;
-            overflow-y: auto; /* 内容が多い場合にスクロール */
+            gap: 0.5rem;
         }
 
-        .sentence-card {
-            background-color: #ffffff;
-            padding: 30px 40px;
-            border-radius: 8px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            text-align: center;
-            width: 100%;
-            max-width: 700px; /* 最大幅 */
-            margin-bottom: 30px;
-        }
-
-        .sentence-text {
-            font-size: 28px; /* セリフのフォントサイズを大きく */
-            line-height: 1.6;
-            color: #2c3e50;
-            margin: 0 0 20px 0; /* 下に少しマージン */
-        }
-        .sentence-text .mask {
-            font-weight: 600;
-            color: #1e88e5; /* マスク部分の色を青系に */
-            border-bottom: 2px solid #1e88e5;
-            padding: 0 5px;
-            display: inline-block; /* 下線が文字幅に合うように */
-            min-width: 60px; /* 最低幅を確保 */
-            text-align: center;
-        }
-
-        .revealed-word-container {
-            margin-top: 15px;
-            font-size: 20px;
-            color: #555;
-        }
-        .revealed-word-container .actual-word {
-            font-weight: 600;
-            color: #4caf50; /* 正解の単語を緑色で強調 */
-            border: 1px solid #4caf50;
-            padding: 3px 8px;
-            border-radius: 4px;
-            background-color: #e8f5e9;
-        }
-
-        .tts-button-main {
-            background-color: #f8f9fa;
-            border: 1px solid #ced4da;
-            color: #495057;
-            padding: 12px 25px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 16px;
-            display: flex;
-            align-items: center;
-            gap: 8px; /* アイコンとテキストの間隔 */
-            transition: background-color 0.2s, border-color 0.2s;
-        }
-        .tts-button-main svg {
-            width: 20px;
-            height: 20px;
-            fill: currentColor;
-        }
-        .tts-button-main:hover {
-            background-color: #e9ecef;
-            border-color: #adb5bd;
-        }
-
-        /* --- 3. Action Bar --- */
-        .action-bar {
-            background-color: #ffffff;
-            padding: 20px;
-            display: flex;
-            justify-content: center; /* ボタンを中央寄せ */
-            align-items: center;
-            border-top: 1px solid #e0e0e0;
-            flex-shrink: 0; /* 高さが変わらないように */
-            gap: 15px; /* ボタン間のスペース */
-            box-shadow: 0 -2px 4px rgba(0,0,0,0.05);
-        }
-
-        .action-button {
-            padding: 12px 25px;
-            font-size: 16px;
+        /* ステータスバッジ */
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: var(--pico-border-radius);
+            font-size: 0.75rem;
             font-weight: 500;
-            border: none;
-            border-radius: 6px;
             color: #fff;
-            cursor: pointer;
-            transition: background-color 0.2s, opacity 0.2s;
-            min-width: 140px; /* ボタン幅をある程度統一 */
+            white-space: nowrap;
+        }
+        .status-badge.in-progress { background-color: #29b6f6; }
+        .status-badge.review { background-color: #ffa726; }
+
+        /* 学習パネル */
+        .learning-panel {
+            padding-top: 2rem;
+        }
+
+        /* 文脈表示エリア */
+        .context-display {
+            padding: 2rem 1rem;
+            background-color: var(--pico-card-background-color);
+            border-radius: var(--pico-card-border-radius);
             text-align: center;
         }
-        .action-button:hover {
-            opacity: 0.85;
+
+        .context-display p {
+            margin: 0.75rem auto;
+            line-height: 1.6;
         }
 
-        .action-button.reveal { background-color: #1e88e5; /* ブルー系 */ }
-        .action-button.correct { background-color: #28a745; /* グリーン系 */ }
-        .action-button.incorrect { background-color: #dc3545; /* レッド系 */ }
-        .action-button.next { background-color: #6c757d; /* グレー系 */ }
+        .context-sentence.prev,
+        .context-sentence.next {
+            font-size: 1rem;
+            opacity: 0.6;
+        }
 
+        .context-sentence.current {
+            font-size: 1.75rem;
+            font-weight: 600;
+        }
+        
+        /* 2種類のマスクのスタイル */
+        /* 現在の回答対象マスク (強調) */
+        .mask.active {
+            background-color: var(--pico-primary-background);
+            color: var(--pico-primary-inverse);
+            padding: 0.2em 0.6em;
+            border-radius: var(--pico-border-radius);
+            font-weight: bold;
+        }
+        
+        /* その他の未回答マスク (控えめ) */
+        .mask.inactive {
+            color: var(--pico-secondary);
+            border-bottom: 2px dotted currentColor;
+            padding: 0.1em 0.6em;
+            font-weight: bold;
+        }
+        
+        /* 正解表示時のスタイル */
+        .mask.correct-answer {
+            background-color: #66bb6a;
+            color: #fff;
+            border-bottom: none;
+            padding: 0.2em 0.6em;
+            border-radius: var(--pico-border-radius);
+            font-weight: bold;
+        }
+
+        .tts-button {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin: 2rem auto; /* 中央寄せ */
+            --pico-font-size: 1rem;
+        }
+        
+        svg {
+            width: 1.2em;
+            height: 1.2em;
+        }
+        
+        .action-buttons {
+            margin-top: 1rem;
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+        }
+        
+        .action-buttons .grid {
+            width: 100%;
+            max-width: 600px;
+        }
+
+        .flow-heading {
+            text-align: center;
+            color: var(--pico-secondary);
+            margin-top: 4rem;
+        }
+        .flow-heading:first-of-type {
+            margin-top: 0;
+        }
+        /* --- ▲ここまで変更▲ --- */
     </style>
 </head>
 <body>
-    <div class="learning-view-container">
-        <div class="top-bar">
-            <button class="back-button" title="エピソード選択に戻る">&lt; 戻る</button>
-            <div class="episode-details">
-                <span class="episode-name">海外ドラマシリーズ エピソード1</span> | <span class="phase-info">初期学習 1/7 周</span>
-            </div>
-            <div class="progress-indicator">問題 5/80</div>
+    <main class="container">
+
+        <header class="learning-header">
+            <a href="#" role="button" class="secondary outline back-button">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+                戻る
+            </a>
+            <hgroup>
+                <h2>日常英会話マスター エピソード5</h2>
+                <div class="learning-status">
+                    <span>初期学習: 3 / 7 周</span>
+                    <span>復習対象: 12 件</span>
+                </div>
+            </hgroup>
+            <span class="status-badge in-progress">初期学習</span>
+        </header>
+
+        <div class="state-container">
+            <h3 class="flow-heading">状態1: 解答を考える</h3>
+            <article class="learning-panel">
+                <section class="context-display">
+                    <p class="context-sentence prev">Oh, you must be Yoko. I'm David.</p>
+                    <p class="context-sentence prev">Yes, I am. It's a pleasure to finally meet you, David.</p>
+                    <p class="context-sentence current">Nice to <span class="mask active">_______</span> you too. I <span class="mask inactive">_______</span> we have a meeting at 3pm.</p>
+                    <p class="context-sentence next">That's right. I'm looking forward to it.</p>
+                </section>
+        
+                <button class="secondary outline tts-button">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon></svg>
+                    セリフを再生
+                </button>
+        
+                <footer class="action-buttons">
+                    <button>答えを見る</button>
+                </footer>
+            </article>
         </div>
 
-        <div class="main-content-area">
-            <div class="sentence-card">
-                <p class="sentence-text">
-                    My friend <span class="mask">______</span> to the party yesterday.
-                </p>
-                <p class="revealed-word-container" id="revealedWordArea" style="display: none;">
-                    正解: <span class="actual-word">came</span>
-                </p>
-            </div>
-            <button class="tts-button-main" title="音声を再生">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
-                </svg>
-                セリフを再生
-            </button>
+        <hr>
+
+        <div class="state-container">
+            <h3 class="flow-heading">状態2: 答え合わせと自己判定</h3>
+            <article class="learning-panel">
+                <section class="context-display">
+                    <p class="context-sentence prev">Oh, you must be Yoko. I'm David.</p>
+                    <p class="context-sentence prev">Yes, I am. It's a pleasure to finally meet you, David.</p>
+                    <p class="context-sentence current">Nice to <span class="mask correct-answer">meet</span> you too. I <span class="mask inactive">_______</span> we have a meeting at 3pm.</p>
+                    <p class="context-sentence next">That's right. I'm looking forward to it.</p>
+                </section>
+
+                <button class="secondary outline tts-button">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon></svg>
+                    セリフを再生
+                </button>
+        
+                <footer class="action-buttons">
+                    <div class="grid">
+                        <button class="secondary">不正解...</button>
+                        <button>正解！</button>
+                    </div>
+                </footer>
+            </article>
         </div>
 
-        <div class="action-bar">
-            <button class="action-button reveal" id="revealBtn">正解を見る</button>
-
-            <div class="judgement-section" id="judgementSection" style="display: none;">
-                <button class="action-button correct">正解だった</button>
-                <button class="action-button incorrect">不正解だった</button>
-            </div>
-
-            <button class="action-button next" id="nextBtn" style="display: none;">次へ</button>
-        </div>
-    </div>
-
-    </body>
+    </main>
+</body>
 </html>
