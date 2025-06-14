@@ -1,10 +1,10 @@
 import type { EpisodeContent, EpisodeProgress } from '$lib/types';
-import { BaseDirectory, exists, mkdir, readDir } from '@tauri-apps/plugin-fs';
+import { BaseDirectory, exists, mkdir, readDir, writeTextFile } from '@tauri-apps/plugin-fs';
 import { error, trace } from '@tauri-apps/plugin-log';
 
 const DATA_DIR = 'data';
 
-export async function loadEpisodes(): Promise<string[]> {
+export async function loadEpisodeIds(): Promise<string[]> {
   trace('Loading episode list...');
   try {
     await ensureDirExists(DATA_DIR, BaseDirectory.AppLocalData);
@@ -30,7 +30,10 @@ export async function loadEpisodeContent(episodeId: string): Promise<EpisodeCont
 export async function saveEpisodeContent(episodeContent: EpisodeContent): Promise<void> {
   trace(`Saving parsed script content for episode: ${episodeContent.episodeId}`);
   try {
-    throw new Error('Not implemented');
+    await ensureDirExists(DATA_DIR, BaseDirectory.AppLocalData);
+    const filePath = getEpisodeJsonFilePath(episodeContent.episodeId);
+    const json = JSON.stringify(episodeContent, null, 2);
+    await writeTextFile(filePath, json, { baseDir: BaseDirectory.AppLocalData });
   } catch (err) {
     error(`Failed to save episode content (${episodeContent.episodeId}): ${err}`);
     throw new Error('Could not save episode content. Please try again later.');
@@ -78,9 +81,24 @@ export async function speak(text: string): Promise<void> {
 // export async function getEpisodeDataDir(baseDir: BaseDirectory): Promise<string>;
 
 /**
+ * エピソードIDから保存用JSONファイル名を生成
+ * 例: "friends_s01e01.txt" → "friends_s01e01.json"
+ */
+function getEpisodeJsonFilePath(episodeId: string): string {
+  const idx = episodeId.lastIndexOf('.');
+  let fileName: string;
+  if (idx !== -1) {
+    fileName = episodeId.substring(0, idx) + '.json';
+  } else {
+    fileName = episodeId + '.json';
+  }
+  return `${DATA_DIR}/${fileName}`;
+}
+
+/**
  * 指定されたディレクトリが存在しなければ再帰的に作成
  */
-export async function ensureDirExists(
+async function ensureDirExists(
   dirPath: string,
   baseDir = BaseDirectory.AppLocalData
 ): Promise<void> {
@@ -93,7 +111,7 @@ export async function ensureDirExists(
 /**
  * ディレクトリをスキャンしてエピソードリストを返す
  */
-export async function scanEpisodeList(baseDir = BaseDirectory.AppLocalData): Promise<string[]> {
+async function scanEpisodeList(baseDir = BaseDirectory.AppLocalData): Promise<string[]> {
   const dirPath = DATA_DIR;
   // ディレクトリが存在しなければ空配列を返す
   if (!(await exists(dirPath, { baseDir }))) {
