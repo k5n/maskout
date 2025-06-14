@@ -17,15 +17,11 @@
       "allow": [{ "path": "$APPLOCALDATA/**" }]
     },
     {
-      "identifier": "fs:allow-write",
+      "identifier": "fs:allow-write-text-file",
       "allow": [{ "path": "$APPLOCALDATA/**" }]
     },
     {
-      "identifier": "fs:allow-read",
-      "allow": [{ "path": "$APPLOCALDATA/**" }]
-    },
-    {
-      "identifier": "fs:allow-remove",
+      "identifier": "fs:allow-read-text-file",
       "allow": [{ "path": "$APPLOCALDATA/**" }]
     },
     {

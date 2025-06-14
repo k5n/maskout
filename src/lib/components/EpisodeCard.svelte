@@ -9,7 +9,7 @@
 
   // ステータス判定
   let status: 'new' | 'in-progress' | 'review' | 'completed';
-  if (!currentLap || currentLap === 0) {
+  if (currentLap === 0) {
     status = 'new';
   } else if (!isInitialCompleted) {
     status = 'in-progress';
@@ -28,7 +28,7 @@
   };
 
   // プログレスバー表示値
-  let progressValue = isInitialCompleted ? totalLaps : currentLap || 0;
+  let progressValue = isInitialCompleted ? totalLaps : Math.max(0, currentLap - 1);
   let progressLabel = '';
   if (status === 'new') {
     progressLabel = `初期学習進捗: - / ${totalLaps} 周`;

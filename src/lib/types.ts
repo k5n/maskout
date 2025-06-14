@@ -72,7 +72,7 @@ export interface EpisodeProgress {
   wordStatus: WordStatus[];
 
   initialLearning: {
-    /** 現在の周回数 (1 から N まで) */
+    /** 現在の周回数 (1 から N まで、0 は未学習) */
     currentLap: number;
     /** 全体の周回数 (N) */
     totalLaps: number;

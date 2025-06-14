@@ -36,8 +36,8 @@ maskout/
 │   │   ├── types.ts          # データ構造の型定義
 │   │   ├── usecases/         # 複数機能を組み合わせるアプリケーションのユースケース
 │   │   │   ├── ...
-│   │   │   └── import.ts              # スクリプトファイルのインポート
-│   │   ├── services/         # 単機能に分離されたコアロジック
+│   │   │   └── episode.ts             # インポートやロードなどエピソード関係のユースケース
+│   │   ├── services/         # 単機能に分離された処理
 │   │   │   ├── file_system.ts         # ファイルシステムへのアクセス
 │   │   │   ├── parse.ts               # エピソードのパース
 │   │   │   ├── ...
@@ -235,14 +235,14 @@ export interface EpisodeProgress {
   wordStatus: WordStatus[];
 
   initialLearning: {
-    currentLap: number; // 現在の周回数 (1 から N まで)
+    currentLap: number; // 現在の周回数 (1 から N まで、0 は未学習)
     totalLaps: number;  // 全体の周回数 （N）
     isCompleted: boolean; // 初期学習フェーズが完了したか（currentLap が N の周回が終了した際に true になる）
   };
 
   reviewPhase: {
     targetWordIds: number[]; // 復習対象の word.id のリスト (重複なし、エピソード内での登場順ソート済み)
-    currentReviewWordIndex: number; // targetWordIds の現在のインデックス (-1 や null で未開始/完了)
+    currentReviewWordIndex: number; // targetWordIds の現在のインデックス (-1 で未開始/完了)
     // 全ての targetWordIds が isCorrectReview = true になったら完了
   };
 
