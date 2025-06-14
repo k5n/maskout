@@ -2,12 +2,13 @@ import type { EpisodeContent, EpisodeProgress } from '$lib/types';
 import { BaseDirectory, exists, mkdir, readDir, writeTextFile } from '@tauri-apps/plugin-fs';
 import { error, trace } from '@tauri-apps/plugin-log';
 
-const DATA_DIR = 'data';
+const EPISODE_DIR = 'episodes';
+const PROGRESS_DIR = 'progress';
 
 export async function loadEpisodeIds(): Promise<string[]> {
   trace('Loading episode list...');
   try {
-    await ensureDirExists(DATA_DIR, BaseDirectory.AppLocalData);
+    await ensureDirExists(EPISODE_DIR, BaseDirectory.AppLocalData);
     const episodes = await scanEpisodeList(BaseDirectory.AppLocalData);
     trace(`Loaded episodes: ${episodes.length}`);
     return episodes;
@@ -30,8 +31,8 @@ export async function loadEpisodeContent(episodeId: string): Promise<EpisodeCont
 export async function saveEpisodeContent(episodeContent: EpisodeContent): Promise<void> {
   trace(`Saving parsed script content for episode: ${episodeContent.episodeId}`);
   try {
-    await ensureDirExists(DATA_DIR, BaseDirectory.AppLocalData);
-    const filePath = getEpisodeJsonFilePath(episodeContent.episodeId);
+    await ensureDirExists(EPISODE_DIR, BaseDirectory.AppLocalData);
+    const filePath = getContentJsonFilePath(episodeContent.episodeId);
     const json = JSON.stringify(episodeContent, null, 2);
     await writeTextFile(filePath, json, { baseDir: BaseDirectory.AppLocalData });
   } catch (err) {
@@ -53,13 +54,15 @@ export async function loadEpisodeProgress(episodeId: string): Promise<EpisodePro
 export async function saveEpisodeProgress(episodeProgress: EpisodeProgress): Promise<void> {
   trace(`Saving progress for episode: ${episodeProgress.episodeId}`);
   try {
-    throw new Error('Not implemented');
+    await ensureDirExists(PROGRESS_DIR, BaseDirectory.AppLocalData);
+    const filePath = getProgressJsonFilePath(episodeProgress.episodeId);
+    const json = JSON.stringify(episodeProgress, null, 2);
+    await writeTextFile(filePath, json, { baseDir: BaseDirectory.AppLocalData });
   } catch (err) {
     error(`Failed to save episode progress (${episodeProgress.episodeId}): ${err}`);
     throw new Error('Could not save episode progress. Please try again later.');
   }
 }
-
 export async function speak(text: string): Promise<void> {
   trace('Starting text-to-speech...');
   try {
@@ -84,15 +87,23 @@ export async function speak(text: string): Promise<void> {
  * エピソードIDから保存用JSONファイル名を生成
  * 例: "friends_s01e01.txt" → "friends_s01e01.json"
  */
-function getEpisodeJsonFilePath(episodeId: string): string {
+function getJsonFileName(episodeId: string): string {
   const idx = episodeId.lastIndexOf('.');
-  let fileName: string;
   if (idx !== -1) {
-    fileName = episodeId.substring(0, idx) + '.json';
+    return episodeId.substring(0, idx) + '.json';
   } else {
-    fileName = episodeId + '.json';
+    return episodeId + '.json';
   }
-  return `${DATA_DIR}/${fileName}`;
+}
+
+function getContentJsonFilePath(episodeId: string): string {
+  const fileName = getJsonFileName(episodeId);
+  return `${EPISODE_DIR}/${fileName}`;
+}
+
+function getProgressJsonFilePath(episodeId: string): string {
+  const fileName = getJsonFileName(episodeId);
+  return `${PROGRESS_DIR}/${fileName}`;
 }
 
 /**
@@ -112,7 +123,7 @@ async function ensureDirExists(
  * ディレクトリをスキャンしてエピソードリストを返す
  */
 async function scanEpisodeList(baseDir = BaseDirectory.AppLocalData): Promise<string[]> {
-  const dirPath = DATA_DIR;
+  const dirPath = EPISODE_DIR;
   // ディレクトリが存在しなければ空配列を返す
   if (!(await exists(dirPath, { baseDir }))) {
     return [];
