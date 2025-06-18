@@ -1,17 +1,14 @@
 <script lang="ts">
   import EpisodeCard from '$lib/components/EpisodeCard.svelte';
   import ErrorDialog from '$lib/components/ErrorDialog.svelte';
+  import FileImportButton from '$lib/components/FileImportButton.svelte';
   import { episodeListStore } from '$lib/stores/episodeListStore.svelte';
   import { importScript, loadEpisodeProgresses } from '$lib/usecases/episode';
-  import Icon from '@iconify/svelte';
   import { onMount } from 'svelte';
 
   const CHUNK_SIZE = 6;
 
   let loading = $state(true);
-  let fileInput: HTMLInputElement;
-
-  // エラーダイアログ用
   let errorDialogOpen = $state(false);
   let dialogMessage = $state('');
 
@@ -35,30 +32,16 @@
     }
   }
 
-  function handleImport() {
-    fileInput.click();
-  }
-
-  function onFileChange(event: Event) {
-    const input = event.target as HTMLInputElement;
-    if (input.files && input.files[0]) {
-      const file = input.files[0];
-      const reader = new FileReader();
-      reader.onload = async (e) => {
-        const text = e.target?.result as string;
-        try {
-          await importScript(text, CHUNK_SIZE);
-        } catch (err) {
-          if (err instanceof Error) {
-            showErrorDialog(err.message);
-          } else {
-            showErrorDialog('エピソードのインポートに失敗しました');
-          }
-        }
-      };
-      reader.readAsText(file);
+  async function handleFileImport(text: string) {
+    try {
+      await importScript(text, CHUNK_SIZE);
+    } catch (err) {
+      if (err instanceof Error) {
+        showErrorDialog(err.message);
+      } else {
+        showErrorDialog('エピソードのインポートに失敗しました');
+      }
     }
-    fileInput.value = '';
   }
 
   function handleSelect(episodeId: string) {
@@ -74,17 +57,7 @@
 
 <header class="app-header">
   <h1>エピソード選択</h1>
-  <button class="secondary import-button" onclick={handleImport}>
-    <Icon icon="lucide:upload" width="24" height="24" />
-    新規エピソードをインポート
-  </button>
-<input
-  type="file"
-  accept=".txt"
-  bind:this={fileInput}
-  onchange={onFileChange}
-  style="display: none;"
-/>
+  <FileImportButton onImport={handleFileImport} label="新規エピソードをインポート" />
 </header>
 
 {#if loading}
@@ -123,12 +96,5 @@
 
   .app-header h1 {
     margin-bottom: 0; /* flexアイテムになったのでマージンを調整 */
-  }
-
-  /* 新規インポートボタン */
-  .import-button {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
   }
 </style>

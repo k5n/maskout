@@ -51,6 +51,7 @@ maskout/
 │       └── components/       # 再利用可能なUIコンポーネント
 │           ├── EpisodeCard.svelte
 │           ├── ErrorDialog.svelte
+│           ├── FileImportButton.svelte
 │           ├── LearningPanel.svelte
 │           └── index.ts
 ├── src-tauri/                # バックエンド (Rust)
