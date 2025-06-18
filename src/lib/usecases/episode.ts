@@ -3,7 +3,7 @@ import {
   loadEpisodeProgress,
   saveEpisodeContent,
   saveEpisodeProgress,
-} from '$lib/infrastructure/file_system';
+} from '$lib/infrastructure/episode_repository';
 import { sha256Hex } from '$lib/services/hash';
 import { initializeEpisodeProgress } from '$lib/services/learning';
 import { parseEpisodeContent } from '$lib/services/parse';

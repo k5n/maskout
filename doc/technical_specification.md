@@ -40,8 +40,7 @@ maskout/
 │       │   └── episode.ts    # インポートやロードなどエピソード関係のユースケース
 │       ├── infrastructure/   # ファイルシステム等のインフラ層
 │       │   ├── api.ts
-│       │   ├── file_system.ts
-│       │   └── file_system.test.ts
+│       │   └── episode_repository.ts
 │       ├── services/         # サービス層
 │       │   ├── hash.ts
 │       │   ├── learning.ts
