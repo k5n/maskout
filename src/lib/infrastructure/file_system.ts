@@ -83,15 +83,6 @@ export async function saveEpisodeProgress(episodeProgress: EpisodeProgress): Pro
     throw new Error('Could not save episode progress. Please try again later.');
   }
 }
-export async function speak(text: string): Promise<void> {
-  trace('Starting text-to-speech...');
-  try {
-    throw new Error('Not implemented');
-  } catch (err) {
-    error(`Text-to-speech failed: ${err}`);
-    throw new Error('Text-to-speech failed. Please try again later.');
-  }
-}
 
 /**
  * エピソードID（ハッシュ値）から保存用JSONファイル名を生成
