@@ -3,7 +3,7 @@ import {
   loadEpisodeProgress,
   saveEpisodeContent,
   saveEpisodeProgress,
-} from '$lib/services/file_system';
+} from '$lib/infrastructure/file_system';
 import { initializeEpisodeProgress } from '$lib/services/learning';
 import { parseEpisodeContent } from '$lib/services/parse';
 import { episodeListStore } from '$lib/stores/episodeListStore.svelte';

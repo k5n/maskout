@@ -1,4 +1,4 @@
-import { loadEpisodeContent, loadEpisodeProgress } from '$lib/services/file_system';
+import { loadEpisodeContent, loadEpisodeProgress } from '$lib/infrastructure/file_system';
 import type { EpisodeContent, EpisodeProgress } from '$lib/types';
 import { error } from '@tauri-apps/plugin-log';
 import type { PageLoad } from './$types';

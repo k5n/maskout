@@ -22,37 +22,36 @@
 maskout/
 ├── doc/                      # ドキュメントを格納
 ├── src/                      # フロントエンド (SvelteKit, TypeScript)
+│   ├── app.css               # グローバルスタイル
 │   ├── app.html              # アプリケーションエントリーポイント
 │   ├── routes/               # SvelteKitページルーティング
 │   │   ├── +layout.svelte    # 共通レイアウト（ナビゲーションメニューなど）
 │   │   ├── +layout.ts        # レイアウト用データ読み込み
 │   │   ├── +page.svelte      # トップページ（エピソード選択画面）
-│   │   ├── learning/         # 学習画面ルート
-│   │   │   └── [episodeId]/  # 動的ルート（エピソード別学習）
-│   │   │       └── +page.svelte  # 学習画面
+│   │   ├─── learning/        # 学習画面ルート
+│   │   │    └── [episodeId]/ # 動的ルート（エピソード別学習）
+│   │   │       ├── +page.svelte  # 学習画面
+│   │   │       └── +page.ts      # 学習画面ロジック
 │   │   └── settings/         # 設定画面ルート
 │   │       └── +page.svelte  # 設定画面
-│   ├── lib/                  # 共通ロジック、型定義、ユーティリティ
-│   │   ├── types.ts          # データ構造の型定義
-│   │   ├── usecases/         # 複数機能を組み合わせるアプリケーションのユースケース
-│   │   │   ├── ...
-│   │   │   └── episode.ts             # インポートやロードなどエピソード関係のユースケース
-│   │   ├── services/         # 単機能に分離された処理
-│   │   │   ├── file_system.ts         # ファイルシステムへのアクセス
-│   │   │   ├── parse.ts               # エピソードのパース
-│   │   │   ├── ...
-│   │   │   └── learning.ts            # 学習の進捗管理
-│   │   ├── stores/           # 状態管理 (Runes 利用)
-│   │   │   ├── learningProgressStore.svelte.ts
-│   │   │   ├── ...
-│   │   │   └── episodeListStore.svelte.ts
-│   │   └── components/       # 再利用可能なUIコンポーネント
-│   │       ├── EpisodeCard.svelte      # エピソード情報表示カード
-│   │       ├── LearningPanel.svelte    # 学習問題表示パネル
-│   │       ├── ProgressBar.svelte      # 進捗表示バー
-│   │       ├── ...
-│   │       └── TTSButton.svelte        # 音声再生ボタン
-│   └── assets/               # 静的アセット（画像、スタイルなど）
+│   └── lib/                  # 共通ロジック、型定義、ユーティリティ
+│       ├── types.ts          # データ構造の型定義
+│       ├── usecases/         # アプリケーションのユースケース
+│       │   └── episode.ts    # インポートやロードなどエピソード関係のユースケース
+│       ├── infrastructure/   # ファイルシステム等のインフラ層
+│       │   ├── api.ts
+│       │   ├── file_system.ts
+│       │   └── file_system.test.ts
+│       ├── services/         # サービス層
+│       │   ├── learning.ts
+│       │   ├── parse.ts
+│       │   └── parse.test.ts
+│       ├── stores/           # 状態管理
+│       │   └── episodeListStore.svelte.ts
+│       └── components/       # 再利用可能なUIコンポーネント
+│           ├── EpisodeCard.svelte
+│           ├── LearningPanel.svelte
+│           └── index.ts
 ├── src-tauri/                # バックエンド (Rust)
 │   ├── src/
 │   │   ├── main.rs           # Rustエントリーポイント、Tauriハンドラ設定
