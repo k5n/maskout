@@ -43,9 +43,10 @@ maskout/
 │       │   ├── file_system.ts
 │       │   └── file_system.test.ts
 │       ├── services/         # サービス層
+│       │   ├── hash.ts
 │       │   ├── learning.ts
 │       │   ├── parse.ts
-│       │   └── parse.test.ts
+│       │   └── parse.test.ts     # 単体テストファイルはテスト対象と同じディレクトリに置く
 │       ├── stores/           # 状態管理
 │       │   └── episodeListStore.svelte.ts
 │       └── components/       # 再利用可能なUIコンポーネント

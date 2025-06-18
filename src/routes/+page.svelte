@@ -46,7 +46,7 @@
       reader.onload = async (e) => {
         const text = e.target?.result as string;
         try {
-          await importScript(text, file.name, CHUNK_SIZE);
+          await importScript(text, CHUNK_SIZE);
         } catch (err) {
           if (err instanceof Error) {
             showErrorDialog(err.message);

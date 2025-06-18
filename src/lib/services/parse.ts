@@ -52,14 +52,31 @@ function tokenizeSentence(
   return { tokens, words };
 }
 
+function extractTitleFromScript(scriptText: string): { title: string; scriptBody: string } {
+  const lines = scriptText.split(/\r?\n/);
+  let title = '';
+  let foundTitle = false;
+  const bodyLines: string[] = [];
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (!foundTitle && trimmed.startsWith('#')) {
+      title = trimmed.replace(/^#\s*/, '');
+      foundTitle = true;
+      continue;
+    }
+    bodyLines.push(line);
+  }
+  return { title, scriptBody: bodyLines.join('\n') };
+}
+
 export async function parseEpisodeContent(
   text: string,
   episodeId: string,
-  chunkSize: number,
-  title: string
+  chunkSize: number
 ): Promise<EpisodeContent> {
+  const { title, scriptBody } = extractTitleFromScript(text);
   // 1. Split lines, skip comments and blanks
-  const lines = text.split(/\r?\n/);
+  const lines = scriptBody.split(/\r?\n/);
   const sentences: Sentence[] = [];
   const allWords: Word[] = [];
   let wordIdCounter = 0;

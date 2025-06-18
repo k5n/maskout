@@ -1,6 +1,6 @@
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
+import type { SentenceToken } from '../types';
 import { parseEpisodeContent } from './parse';
-import type { EpisodeContent, Sentence, Word, SentenceToken } from '../types';
 
 const sampleScript = `# Sample Anime Episode Script - Episode 001
 # Character: Sakura, Takeshi
@@ -24,6 +24,7 @@ describe('parseEpisodeContent', () => {
 
     expect(result).toBeDefined();
     expect(result.episodeId).toBe(episodeId);
+    expect(result.title).toBe('Sample Anime Episode Script - Episode 001');
     expect(Array.isArray(result.sentences)).toBe(true);
     expect(Array.isArray(result.allWords)).toBe(true);
     expect(typeof result.importedTimestamp).toBe('string');
