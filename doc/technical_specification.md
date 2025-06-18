@@ -50,6 +50,7 @@ maskout/
 │       │   └── episodeListStore.svelte.ts
 │       └── components/       # 再利用可能なUIコンポーネント
 │           ├── EpisodeCard.svelte
+│           ├── ErrorDialog.svelte
 │           ├── LearningPanel.svelte
 │           └── index.ts
 ├── src-tauri/                # バックエンド (Rust)

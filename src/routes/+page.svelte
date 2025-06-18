@@ -1,5 +1,6 @@
 <script lang="ts">
   import EpisodeCard from '$lib/components/EpisodeCard.svelte';
+  import ErrorDialog from '$lib/components/ErrorDialog.svelte';
   import { episodeListStore } from '$lib/stores/episodeListStore.svelte';
   import { importScript, loadEpisodeProgresses } from '$lib/usecases/episode';
   import Icon from '@iconify/svelte';
@@ -11,16 +12,16 @@
   let fileInput: HTMLInputElement;
 
   // エラーダイアログ用
-  let errorDialog: HTMLDialogElement;
+  let errorDialogOpen = $state(false);
   let dialogMessage = $state('');
 
   function showErrorDialog(message: string) {
     dialogMessage = message;
-    errorDialog.showModal();
+    errorDialogOpen = true;
   }
 
   function closeDialog() {
-    errorDialog.close();
+    errorDialogOpen = false;
   }
   
   async function fetchEpisodes() {
@@ -98,17 +99,7 @@
   </div>
 {/if}
 
-<dialog bind:this={errorDialog}>
-  <article>
-    <header>
-      <strong>エラー</strong>
-    </header>
-    <p>{dialogMessage}</p>
-    <footer>
-      <button onclick={closeDialog}>閉じる</button>
-    </footer>
-  </article>
-</dialog>
+<ErrorDialog open={errorDialogOpen} message={dialogMessage} onClose={closeDialog} />
 
 <style>
   @media (min-width: 768px) {
